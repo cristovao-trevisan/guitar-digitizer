@@ -1,0 +1,4 @@
+
+.ui.list .active.item {
+  font-weight: bold !important;
+}
