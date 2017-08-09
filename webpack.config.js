@@ -1,6 +1,5 @@
 'use strict'
 const path = require('path')
-const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const ProgressBarPlugin = require('progress-bar-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
@@ -10,18 +9,14 @@ const plugins = [
     template: 'index.ejs'
   }),
   new ExtractTextPlugin('[name].bundle.css'),
-  new ProgressBarPlugin(),
-  new webpack.HotModuleReplacementPlugin()
+  new ProgressBarPlugin()
 ]
 
 module.exports = {
   target: 'electron',
   context: path.join(__dirname, 'app'),
   entry: {
-    app: [
-      'react-hot-loader/patch',
-      './index'
-    ],
+    app: './index',
     vendor: ['react', 'react-dom', 'semantic-ui-react']
   },
   output: {
@@ -50,7 +45,10 @@ module.exports = {
     ]
   },
   plugins,
-  devServer: {
-    hot: true
+  resolve: {
+    alias: {
+      'react': path.join(__dirname, 'node_modules', 'react')
+    },
+    extensions: ['.js']
   }
 }

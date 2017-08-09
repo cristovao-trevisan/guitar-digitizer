@@ -2,6 +2,7 @@ import React from 'react'
 
 import SideBar from './SideBar'
 import Home from '../containers/Home'
+import Plot from '../containers/Plot'
 
 class App extends React.Component {
   state = {
@@ -14,7 +15,7 @@ class App extends React.Component {
     let page
     switch (this.state.activePage) {
       case 'Plot': {
-        page = 'Plot'
+        page = <Plot />
         break
       }
       case 'Options': {

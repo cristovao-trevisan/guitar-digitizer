@@ -12,7 +12,7 @@ export default class SideBar extends React.Component {
     let toRender = []
     items.forEach(([name, icon], i) => {
       toRender.push(
-        <Menu.Item id={i} active={activeItem === name} name={name} onClick={this.handleItemClick}>
+        <Menu.Item key={i} active={activeItem === name} name={name} onClick={this.handleItemClick}>
           <Icon name={icon} />
           {name}
         </Menu.Item>
@@ -20,7 +20,7 @@ export default class SideBar extends React.Component {
     })
 
     return (
-      <Menu icon='labeled' size='tiny' vertical fixed inverted style={{height: '100%', width: '80px', borderRadius: 0}}>
+      <Menu icon='labeled' size='tiny' vertical inverted style={{height: '100%', width: '80px', borderRadius: 0}}>
         {toRender}
       </Menu>
     )

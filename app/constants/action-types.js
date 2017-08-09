@@ -8,3 +8,9 @@ export const REMOVE_DEVICE = 2
 // signals reducer
 export const SET_SIGNALS = 3
 export const CLEAR_SIGNALS = 4
+
+// signals data reducer
+export const SET_SIGNALS_DATA = 5
+
+// plot plot
+export const SET_PLOT_PAGE_PROP = 6
