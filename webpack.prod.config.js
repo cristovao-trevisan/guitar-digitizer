@@ -15,6 +15,7 @@ const plugins = [
 ]
 
 module.exports = {
+  target: 'electron',
   context: path.join(__dirname, 'app'),
   entry: {
     app: './index',
@@ -30,9 +31,7 @@ module.exports = {
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        use: [{
-          loader: 'babel-loader'
-        }]
+        use: [{ loader: 'babel-loader' }]
       },
       {
         test: /\.css$/,
@@ -48,6 +47,10 @@ module.exports = {
     ]
   },
   plugins,
-  externals: {
+  resolve: {
+    alias: {
+      'react': path.join(__dirname, 'node_modules', 'react')
+    },
+    extensions: ['.js']
   }
 }

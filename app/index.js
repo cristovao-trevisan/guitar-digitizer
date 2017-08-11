@@ -10,8 +10,9 @@ import App from './components/App'
 import reducers from './reducers'
 import * as usb from './modules/usb'
 import { addDevice, removeDevice, setDevice, setSignals, setSignalsData } from './actions'
-import { signals as GUITAR_SIGNALS } from './constants/guitar'
+import { signals as GUITAR_SIGNALS, sampleFrequency } from './constants/guitar'
 import guitarInterpreter from './modules/guitarInterpreter'
+import { frequencyDetector } from './modules/frequencyDetector'
 
 const store = createStore(reducers)
 
@@ -38,19 +39,25 @@ store.subscribe(() => {
     usb.closeDevice().then(() => {
       // open the new one
       if (usb.openDevice(currentDevice)) {
-        let interpreter = guitarInterpreter()
+        const interpret = guitarInterpreter()
+        const calcFrequency = frequencyDetector(sampleFrequency, 4096)
         // set the signals
         store.dispatch(setSignals(GUITAR_SIGNALS))
         // set the data listener
         usb.onData(data => {
           try {
-            let analysedData = interpreter(data)
+            let analysedData = interpret(data)
             if (analysedData) {
               store.dispatch(setSignalsData(
                 GUITAR_SIGNALS.map((signal, i) => ({
                   [signal.id]: analysedData[i]
                 }))
               ))
+              GUITAR_SIGNALS.forEach((signal, i) => {
+                calcFrequency(analysedData[i]).then(pitch => {
+                  console.log(pitch)
+                }).catch(console.error)
+              })
             }
           } catch (err) {
             console.error(err)

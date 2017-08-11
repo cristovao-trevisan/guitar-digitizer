@@ -5,9 +5,6 @@ export default (signals = [], action) => {
     case SET_SIGNALS: {
       return action.signals
     }
-    case CLEAR_SIGNALS: {
-      return []
-    }
     default:
       return signals
   }

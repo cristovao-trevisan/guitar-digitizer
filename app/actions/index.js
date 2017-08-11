@@ -29,3 +29,10 @@ export const setPlotPageProp = props => ({
   type: types.SET_PLOT_PAGE_PROP,
   props
 })
+
+export const setPitch = (id, pitch) => ({
+  type: types.SET_PITCH,
+  pitch: { [id]: pitch }
+})
+
+export const clearPitches = { type: types.CLEAR_PITCHES }
