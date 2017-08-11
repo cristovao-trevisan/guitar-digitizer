@@ -5,3 +5,9 @@ export const filterObject = (object, filter) => {
   }
   return result
 }
+
+export const repeat = (arr, n) => {
+  let output = []
+  for (let i = 0; i < n; i++) output = output.concat(arr)
+  return output
+}

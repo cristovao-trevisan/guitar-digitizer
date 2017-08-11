@@ -8,7 +8,7 @@
     "electron-dev": "NODE_ENV=development electron .",
     "build": "NODE_ENV=production webpack",
     "start": "NODE_ENV=production electron .",
-    "test": "standard"
+    "test": "standard && jest --verbose"
   },
   "author": "",
   "license": "ISC",
@@ -38,6 +38,7 @@
     "semantic-ui-css": "^2.2.11",
     "semantic-ui-react": "^0.71.0",
     "style-loader": "^0.18.2",
+    "tonegenerator": "^0.2.1",
     "usb": "^1.2.0",
     "webpack": "^3.4.1"
   },
@@ -48,11 +49,13 @@
     "electron-rebuild": "^1.6.0",
     "eslint": "^3.19.0",
     "eslint-plugin-import": "^2.7.0",
+    "jest": "^20.0.4",
     "standard": "^9.0.2",
     "webpack-dev-server": "^2.5.1"
   },
   "standard": {
     "parser": "babel-eslint",
+    "env": "jest",
     "ignore": [
       "www"
     ]
