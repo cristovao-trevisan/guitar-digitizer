@@ -5,18 +5,17 @@ const ProgressBarPlugin = require('progress-bar-webpack-plugin')
 const ExtractTextPlugin = require('extract-text-webpack-plugin')
 
 const plugins = [
-  new HtmlWebpackPlugin({
-    template: 'index.ejs'
-  }),
   new ExtractTextPlugin('[name].bundle.css'),
+  new HtmlWebpackPlugin({
+    template: './app/index.ejs'
+  }),
   new ProgressBarPlugin()
 ]
 
 module.exports = {
-  target: 'electron',
-  context: path.join(__dirname, 'app'),
+  target: 'node-webkit',
   entry: {
-    app: './index',
+    app: './app/index',
     vendor: ['react', 'react-dom', 'semantic-ui-react']
   },
   output: {
@@ -50,5 +49,9 @@ module.exports = {
       'react': path.join(__dirname, 'node_modules', 'react')
     },
     extensions: ['.js']
+  },
+  externals: {
+    'node-pitchfinder': 'nodePitchfinder',
+    usb: 'usb'
   }
 }

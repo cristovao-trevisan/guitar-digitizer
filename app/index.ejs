@@ -5,5 +5,11 @@
 </head>
 <body>
   <div id="app" />
+  <script>
+    const win = nw.Window.get();
+    win.showDevTools()
+    window.usb = require('usb')
+    window.nodePitchfinder = require('node-pitchfinder')
+  </script>
 </body>
 </html>

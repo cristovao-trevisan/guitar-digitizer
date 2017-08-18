@@ -1,4 +1,4 @@
-import { SET_SIGNALS, CLEAR_SIGNALS } from '../constants/action-types'
+import { SET_SIGNALS } from '../constants/action-types'
 
 export default (signals = [], action) => {
   switch (action.type) {

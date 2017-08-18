@@ -2,7 +2,7 @@ import object from './object'
 const SET = 0
 const REMOVE = 1
 const CLEAR = 2
-const reducer = object(SET, REMOVE, CLEAR)
+const reducer = object(SET, CLEAR, REMOVE)
 
 test('default value', () => {
   expect(reducer(undefined, {})).toEqual({})

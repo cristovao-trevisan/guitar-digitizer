@@ -1,4 +1,4 @@
-export default (SET, REMOVE, CLEAR) => (state = {}, action) => {
+export default (SET, CLEAR, REMOVE) => (state = {}, action) => {
   switch (action.type) {
     case SET: {
       return Object.assign({}, state, action.props)

@@ -1,6 +1,4 @@
-import { remote } from 'electron'
-
-const usb = remote.getGlobal('usb')
+const usb = require('usb')
 
 const VENDOR_ID = 0xf347
 const PRODUCT_ID = 0x666f

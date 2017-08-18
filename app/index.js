@@ -1,6 +1,5 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { AppContainer } from 'react-hot-loader'
 import 'semantic-ui-css/semantic.min.css'
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
@@ -12,9 +11,12 @@ import * as usb from './modules/usb'
 import { addDevice, removeDevice, setDevice, setSignals, setSignalsData } from './actions'
 import { signals as GUITAR_SIGNALS, sampleFrequency } from './constants/guitar'
 import guitarInterpreter from './modules/guitarInterpreter'
-import { frequencyDetector } from './modules/frequencyDetector'
 
 const store = createStore(reducers)
+
+// create frequency detector
+const { MacLeod } = require('node-pitchfinder')
+let pitchDetector = MacLeod({ bufferSize: 2048, sampleRate: sampleFrequency })
 
 // read devices
 usb.getDevices().forEach(device => {
@@ -40,7 +42,6 @@ store.subscribe(() => {
       // open the new one
       if (usb.openDevice(currentDevice)) {
         const interpret = guitarInterpreter()
-        const calcFrequency = frequencyDetector(sampleFrequency, 4096)
         // set the signals
         store.dispatch(setSignals(GUITAR_SIGNALS))
         // set the data listener
@@ -54,9 +55,8 @@ store.subscribe(() => {
                 }))
               ))
               GUITAR_SIGNALS.forEach((signal, i) => {
-                calcFrequency(analysedData[i]).then(pitch => {
-                  console.log(pitch)
-                }).catch(console.error)
+                let pitch = pitchDetector(analysedData[i].slice(0, 2048))
+                if (pitch > 70 && pitch < 1500) console.log(pitch)
               })
             }
           } catch (err) {
@@ -71,10 +71,8 @@ store.subscribe(() => {
 })
 
 ReactDOM.render(
-  <AppContainer>
-    <Provider store={store}>
-      <App />
-    </Provider>
-  </AppContainer>,
+  <Provider store={store}>
+    <App />
+  </Provider>,
   document.getElementById('app')
 )
