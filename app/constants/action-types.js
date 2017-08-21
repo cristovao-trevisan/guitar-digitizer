@@ -17,3 +17,6 @@ export const SET_PLOT_PAGE_PROP = 6
 // pitch reducer
 export const SET_PITCH = 7
 export const CLEAR_PITCHES = 8
+
+export const SET_OPTION = 9
+export const CLEAR_OPTIONS = 10

@@ -32,7 +32,14 @@ export const setPlotPageProp = props => ({
 
 export const setPitch = (id, pitch) => ({
   type: types.SET_PITCH,
-  pitch: { [id]: pitch }
+  props: { [id]: pitch }
 })
 
 export const clearPitches = { type: types.CLEAR_PITCHES }
+
+export const setOption = (option, value) => ({
+  type: types.SET_OPTION,
+  props: { [option]: value }
+})
+
+export const clearOptions = { type: types.CLEAR_OPTIONS }

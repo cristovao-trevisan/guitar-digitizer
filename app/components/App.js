@@ -3,6 +3,7 @@ import React from 'react'
 import SideBar from './SideBar'
 import Home from '../containers/Home'
 import Plot from '../containers/Plot'
+import Options from '../containers/Options'
 
 class App extends React.Component {
   state = {
@@ -19,7 +20,7 @@ class App extends React.Component {
         break
       }
       case 'Options': {
-        page = 'Options'
+        page = <Options />
         break
       }
       default: { // Home

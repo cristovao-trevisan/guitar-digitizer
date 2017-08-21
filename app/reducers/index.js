@@ -6,7 +6,7 @@ import signals from './signals'
 import signalsData from './signalsData'
 import objectReducer from './object'
 
-import { SET_PLOT_PAGE_PROP, SET_PITCH, CLEAR_PITCHES } from '../constants/action-types'
+import { SET_PLOT_PAGE_PROP, SET_PITCH, CLEAR_PITCHES, SET_OPTION, CLEAR_OPTIONS } from '../constants/action-types'
 
 export default combineReducers({
   device,
@@ -14,5 +14,6 @@ export default combineReducers({
   signals,
   signalsData,
   plotPage: objectReducer(SET_PLOT_PAGE_PROP),
-  pitches: objectReducer(SET_PITCH, CLEAR_PITCHES)
+  pitches: objectReducer(SET_PITCH, CLEAR_PITCHES),
+  options: objectReducer(SET_OPTION, CLEAR_OPTIONS)
 })
