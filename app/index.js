@@ -3,14 +3,25 @@ import ReactDOM from 'react-dom'
 import 'semantic-ui-css/semantic.min.css'
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
+import { toMidi as freqToMidi } from 'tonal-freq'
 
 import './css/index.css'
 import App from './components/App'
 import reducers from './reducers'
 import * as usb from './modules/usb'
-import { addDevice, removeDevice, setDevice, setSignals, setSignalsData, setOption } from './actions'
+import * as midi from './modules/midi'
 import { signals as GUITAR_SIGNALS, sampleFrequency } from './constants/guitar'
 import guitarInterpreter from './modules/guitarInterpreter'
+import { addDevice,
+  removeDevice,
+  setDevice,
+  setMidiDevices,
+  setMidiOpenDevices,
+  setSignals,
+  setSignalsData,
+  setOption,
+  removeSignalToMidiConnection
+} from './actions'
 
 const store = createStore(reducers)
 
@@ -19,6 +30,7 @@ const { MacLeod, YIN } = require('node-pitchfinder')
 const basePitchOptions = {bufferSize: 2048, sampleRate: sampleFrequency}
 let pitchDetector = MacLeod(basePitchOptions)
 
+// ********************************* USB ***************************************
 // read devices
 usb.getDevices().forEach(device => {
   store.dispatch(addDevice(device))
@@ -33,6 +45,27 @@ usb.onDetach(device => {
   store.dispatch(removeDevice(device))
 })
 
+// *********************************** MIDI ************************************
+// set initial state
+store.dispatch(setMidiDevices(midi.getDevices()))
+store.dispatch(setMidiOpenDevices([]))
+// update state
+midi.onChange(devices => {
+  const openDevices = midi.getOpenDevices()
+  store.dispatch(setMidiOpenDevices(openDevices))
+  store.dispatch(setMidiDevices(devices.filter(device => !openDevices.includes(device))))
+  const connections = store.getState().signalToMidiConnections
+  for (let id in connections) {
+    if (!openDevices.includes(connections[id].midi)) store.dispatch(removeSignalToMidiConnection(id))
+  }
+})
+
+const onPitch = (signalId, pitch) => {
+  const note = freqToMidi(pitch)
+  console.log(note)
+}
+
+// ******************************* DATA PROCESSING *****************************
 const dataListerner = interpreter => data => {
   try {
     const analysedData = interpreter(data)
@@ -43,8 +76,8 @@ const dataListerner = interpreter => data => {
         }))
       ))
       GUITAR_SIGNALS.forEach((signal, i) => {
-        let pitch = pitchDetector(analysedData[i].slice(0, 2048))
-        if (pitch > 70 && pitch < 1500) console.log(pitch)
+        const { pitch, probability } = pitchDetector.getResult(analysedData[i].slice(0, 2048))
+        if (probability > 0.5 && pitch > 70 && pitch < 1500) onPitch(signal.id, pitch)
       })
     }
   } catch (err) {
@@ -57,13 +90,12 @@ store.subscribe(() => {
   let currentDevice = store.getState().device
   // if device changed
   if (usb.getDevice() !== currentDevice) {
+    console.log(currentDevice)
     // close the current device
     usb.closeDevice().then(() => {
       // open the new one
       if (usb.openDevice(currentDevice)) {
-        // set the signals
         store.dispatch(setSignals(GUITAR_SIGNALS))
-        // set the data listener
         usb.onData(dataListerner(guitarInterpreter()))
       } else {
         store.dispatch(setDevice(null))
@@ -89,6 +121,9 @@ store.subscribe(() => {
 })
 store.dispatch(setOption('pitchAlgorithm', 'MacLeod'))
 
+store.dispatch(setSignals(GUITAR_SIGNALS))
+
+// store.dispatch(setSignals(GUITAR_SIGNALS))
 ReactDOM.render(
   <Provider store={store}>
     <App />

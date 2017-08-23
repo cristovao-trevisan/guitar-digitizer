@@ -5,9 +5,9 @@ export default (SET, CLEAR, REMOVE) => (state = {}, action) => {
     }
     case REMOVE: {
       if (REMOVE === undefined) return state
-      return Object.assign({}, state, action.props.reduce((sum, value) => {
-        return Object.assign(sum, {[value]: undefined})
-      }, {}))
+      const newObj = Object.assign({}, state)
+      for (let prop of action.props) delete newObj[prop]
+      return newObj
     }
     case CLEAR: {
       if (CLEAR !== undefined) return {}

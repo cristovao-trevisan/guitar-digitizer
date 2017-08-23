@@ -2,7 +2,8 @@ import {
   onChange as onMidiChange,
   createVirtual as createVirtualMidi,
   open as openMidi,
-  getDevices } from '../app/modules/midi'
+  getDevices
+} from '../app/modules/midi'
 
 console.log(getDevices())
 

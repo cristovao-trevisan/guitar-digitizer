@@ -52,6 +52,7 @@ module.exports = {
   },
   externals: {
     'node-pitchfinder': 'nodePitchfinder',
-    usb: 'usb'
+    usb: 'usb',
+    midi: 'midi'
   }
 }

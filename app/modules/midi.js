@@ -1,11 +1,12 @@
 import midi from 'midi'
-import { arrayEqual as equal } from '../helpers'
+import { arrayEqual as equal, filterObject } from '../helpers'
 
 const output = new midi.output() // eslint-disable-line
 const input = new midi.input() // eslint-disable-line
 
 let devices = []
 let openDevices = []
+let devicesReferences = {}
 let changeCallback = () => {}
 
 const list = () => {
@@ -20,13 +21,14 @@ const list = () => {
 }
 
 let checkTimeout
-const checkDeviceListChange = (callCallback) => {
+const checkDeviceListChange = () => {
   const newDeviceList = list()
 
   if (!equal(devices, newDeviceList)) {
     devices = newDeviceList
-    openDevices.filter(el => devices.includes(el))
-    changeCallback(devices)
+    openDevices = openDevices.filter(el => devices.includes(el))
+    devicesReferences = filterObject(devicesReferences, (el, key) => openDevices.includes(key))
+    changeCallback()
   }
 
   clearTimeout(checkTimeout)
@@ -34,10 +36,11 @@ const checkDeviceListChange = (callCallback) => {
 }
 checkDeviceListChange()
 
+export const getDevice = name => devicesReferences[name]
 export const getDevices = () => devices
 export const getOpenDevices = () => openDevices
 
-export const onChange = callback => { changeCallback = callback }
+export const onChange = callback => { changeCallback = () => callback(devices) }
 
 export const open = name => {
   checkDeviceListChange()
@@ -46,7 +49,19 @@ export const open = name => {
   const output = new midi.output() // eslint-disable-line
   output.openPort(index)
   openDevices.push(name)
+  devicesReferences[name] = output
+  process.nextTick(changeCallback)
   return output
+}
+
+export const close = name => {
+  const device = devicesReferences[name]
+  if (device) {
+    device.closePort()
+    openDevices = openDevices.filter(el => el !== name)
+    process.nextTick(changeCallback)
+    delete devicesReferences[name]
+  }
 }
 
 /*

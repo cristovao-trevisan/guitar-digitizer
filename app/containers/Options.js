@@ -1,6 +1,8 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Dropdown, Input } from 'semantic-ui-react'
+import { Button, Dropdown, Input } from 'semantic-ui-react'
+
+import { createVirtual as createVirtualMidi } from '../modules/midi'
 
 import pitchAlgorithms from '../constants/pitchAlgorithms'
 import { setOption } from '../actions'
@@ -34,14 +36,26 @@ class Options extends React.Component {
     )
   }
 
+  handleCreateMidiClick = () => {
+    const name = window.prompt('MIDI Name:', 'GUITAR MIDI')
+    if (name) createVirtualMidi(name)
+  }
+
   render () {
     const { pitchAlgorithm } = this.props.options
     const dropdownOptions = pitchAlgorithms.map(algo => ({text: algo.name, value: algo.name, key: algo.name}))
 
     return (
       <div style={{marginTop: '2%', marginLeft: '2%'}}>
-        <Dropdown options={dropdownOptions} value={pitchAlgorithm} onChange={this.handleAlgorithmChange} style={{width: 110, whiteSpace: 'nowrap'}} />
-        {this.renderPitchAlgorithmOptions()}
+        <div style={{width: '100%'}}>
+          <Dropdown options={dropdownOptions} value={pitchAlgorithm} onChange={this.handleAlgorithmChange} style={{width: 110, whiteSpace: 'nowrap'}} />
+          {this.renderPitchAlgorithmOptions()}
+        </div>
+        <div style={{width: '100%', marginTop: '2%'}}>
+          <Button onClick={this.handleCreateMidiClick}>
+            Create Virtual MIDI
+          </Button>
+        </div>
       </div>
     )
   }

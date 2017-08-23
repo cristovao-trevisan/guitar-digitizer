@@ -30,8 +30,8 @@
     "html-webpack-plugin": "^2.29.0",
     "json-loader": "^0.5.7",
     "midi": "^0.9.5",
-    "node-pitchfinder": "^1.0.2",
-    "nw": "^0.24.3",
+    "node-pitchfinder": "^1.0.3",
+    "nw": "^0.24.2-sdk",
     "progress-bar-webpack-plugin": "^1.10.0",
     "react": "^15.6.1",
     "react-dom": "^15.6.1",
@@ -42,6 +42,7 @@
     "semantic-ui-css": "^2.2.11",
     "semantic-ui-react": "^0.71.0",
     "style-loader": "^0.18.2",
+    "tonal-freq": "^0.69.9",
     "usb": "^1.2.0",
     "webpack": "^3.5.5"
   },
