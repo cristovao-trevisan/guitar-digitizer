@@ -1,6 +1,6 @@
 import React from 'react'
 import { connect } from 'react-redux'
-import { Button, Dropdown, Input } from 'semantic-ui-react'
+import { Button, Divider, Dropdown, Input, Segment } from 'semantic-ui-react'
 
 import { createVirtual as createVirtualMidi } from '../modules/midi'
 
@@ -46,16 +46,15 @@ class Options extends React.Component {
     const dropdownOptions = pitchAlgorithms.map(algo => ({text: algo.name, value: algo.name, key: algo.name}))
 
     return (
-      <div style={{marginTop: '2%', marginLeft: '2%'}}>
-        <div style={{width: '100%'}}>
-          <Dropdown options={dropdownOptions} value={pitchAlgorithm} onChange={this.handleAlgorithmChange} style={{width: 110, whiteSpace: 'nowrap'}} />
+      <div style={{margin: '2%'}}>
+        <Segment padded>
+          <Dropdown options={dropdownOptions} value={pitchAlgorithm} onChange={this.handleAlgorithmChange} fluid selection style={{width: 110, whiteSpace: 'nowrap'}} />
+          <Divider />
           {this.renderPitchAlgorithmOptions()}
-        </div>
-        <div style={{width: '100%', marginTop: '2%'}}>
-          <Button onClick={this.handleCreateMidiClick}>
-            Create Virtual MIDI
-          </Button>
-        </div>
+        </Segment>
+        <Button onClick={this.handleCreateMidiClick}>
+          Create Virtual MIDI
+        </Button>
       </div>
     )
   }

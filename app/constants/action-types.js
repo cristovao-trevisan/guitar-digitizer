@@ -8,9 +8,11 @@ export const REMOVE_DEVICE = actionCounter++
 
 // signals reducer
 export const SET_SIGNALS = actionCounter++
+export const CLEAR_SIGNALS = actionCounter++
 
 // signals data reducer
 export const SET_SIGNALS_DATA = actionCounter++
+// and CLEAR_SIGNALS above
 
 // plot props
 export const SET_PLOT_PAGE_PROP = actionCounter++

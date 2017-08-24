@@ -18,9 +18,11 @@ import { addDevice,
   setMidiDevices,
   setMidiOpenDevices,
   setSignals,
+  clearSignals,
   setSignalsData,
   setOption,
-  removeSignalToMidiConnection
+  removeSignalToMidiConnection,
+  clearSignalToMidiConnections
 } from './actions'
 
 const store = createStore(reducers)
@@ -40,7 +42,8 @@ usb.getDevices().forEach(device => {
 usb.onAttach(device => store.dispatch(addDevice(device)))
 usb.onDetach(device => {
   if (device === store.getState().device) {
-    store.dispatch(setSignals([]))
+    store.dispatch(clearSignals)
+    store.dispatch(clearSignalToMidiConnections)
   }
   store.dispatch(removeDevice(device))
 })
@@ -62,7 +65,7 @@ midi.onChange(devices => {
 
 const onPitch = (signalId, pitch) => {
   const note = freqToMidi(pitch)
-  console.log(note)
+  console.log(GUITAR_SIGNALS[signalId - 1], note)
 }
 
 // ******************************* DATA PROCESSING *****************************
@@ -121,7 +124,7 @@ store.subscribe(() => {
 })
 store.dispatch(setOption('pitchAlgorithm', 'MacLeod'))
 
-store.dispatch(setSignals(GUITAR_SIGNALS))
+// store.dispatch(setSignals(GUITAR_SIGNALS))
 
 // store.dispatch(setSignals(GUITAR_SIGNALS))
 ReactDOM.render(

@@ -23,6 +23,10 @@ export const setSignals = signals => ({
   signals
 })
 
+export const clearSignals = {
+  type: types.CLEAR_SIGNALS
+}
+
 // signals data
 export const setSignalsData = signals => ({
   type: types.SET_SIGNALS_DATA,

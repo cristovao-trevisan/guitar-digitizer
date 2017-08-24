@@ -44,7 +44,7 @@ class Plot extends React.Component {
     let height = Math.max(window.innerHeight * 0.4, 190)
     return (
       <div style={{marginTop: '2%', marginLeft: '2%'}}>
-        <Dropdown options={options} onChange={this.handleSignalChange} style={{width: 110, whiteSpace: 'nowrap'}} />
+        <Dropdown options={options} onChange={this.handleSignalChange} style={{width: 110, whiteSpace: 'nowrap'}} fluid selection />
         <div style={{height: window.innerHeight * 0.4, minHeight: 190}}>
           <div style={{float: 'left'}}>
             <Plotter
