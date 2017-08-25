@@ -78,6 +78,7 @@ const dataListerner = interpreter => data => {
           [signal.id]: analysedData[i]
         }))
       ))
+      // TODO: change the pitch detection to a module
       GUITAR_SIGNALS.forEach((signal, i) => {
         const { pitch, probability } = pitchDetector.getResult(analysedData[i].slice(0, 2048))
         if (probability > 0.5 && pitch > 70 && pitch < 1500) onPitch(signal.id, pitch)

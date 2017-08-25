@@ -1,4 +1,4 @@
-import { Sinewave } from 'react-plotter/dist/helpers/waveGenerators'
+import { Sinewave } from 'wave-generator'
 import { sampleFrequency as sampleRate } from '../constants/guitar'
 import { YIN, MacLeod } from 'node-pitchfinder'
 
