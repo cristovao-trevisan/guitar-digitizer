@@ -3,7 +3,6 @@ import ReactDOM from 'react-dom'
 import 'semantic-ui-css/semantic.min.css'
 import { Provider } from 'react-redux'
 import { createStore } from 'redux'
-import { toMidi as freqToMidi } from 'tonal-freq'
 
 import './css/index.css'
 import App from './components/App'
@@ -11,7 +10,7 @@ import reducers from './reducers'
 import * as usb from './modules/usb'
 import * as midi from './modules/midi'
 import { signals as GUITAR_SIGNALS, sampleFrequency } from './constants/guitar'
-import guitarInterpreter from './modules/guitarInterpreter'
+import { interpreter as guitarInterpreter, processor as guitarProcessor } from './modules/guitarSignalProcessor'
 import { addDevice,
   removeDevice,
   setDevice,
@@ -63,29 +62,46 @@ midi.onChange(devices => {
   }
 })
 
-const onPitch = (signalId, pitch) => {
-  const note = freqToMidi(pitch)
-  console.log(GUITAR_SIGNALS[signalId - 1], note)
+// ******************************* DATA PROCESSING *****************************
+const noteOn = (channel, note, velocity) => [0b10010000 | channel, parseInt(note), parseInt(velocity)]
+const onNoteOn = (id, note, velocity) => {
+  console.log('Note on, id: ' + id + ', note: ' + note)
+  const connection = store.getState().signalToMidiConnections[id]
+  if (connection) {
+    const device = midi.getDevice(connection.midi)
+    console.log(device)
+    device.sendMessage(noteOn(connection.channel, note, velocity))
+  }
 }
 
-// ******************************* DATA PROCESSING *****************************
-const dataListerner = interpreter => data => {
-  try {
-    const analysedData = interpreter(data)
-    if (analysedData) {
-      store.dispatch(setSignalsData(
-        GUITAR_SIGNALS.map((signal, i) => ({
-          [signal.id]: analysedData[i]
-        }))
-      ))
-      // TODO: change the pitch detection to a module
-      GUITAR_SIGNALS.forEach((signal, i) => {
-        const { pitch, probability } = pitchDetector.getResult(analysedData[i].slice(0, 2048))
-        if (probability > 0.5 && pitch > 70 && pitch < 1500) onPitch(signal.id, pitch)
-      })
+const noteOff = (channel, note, velocity) => [0b10000000 | channel, parseInt(note), parseInt(velocity)]
+const onNoteOff = (id, note, velocity) => {
+  console.log('Note off, id: ' + id + ', note: ' + note)
+  const connection = store.getState().signalToMidiConnections[id]
+  if (connection) {
+    const device = midi.getDevice(connection.midi)
+    device.sendMessage(noteOff(connection.channel, note, 0x10))
+  }
+}
+const dataListener = () => {
+  const interpreter = guitarInterpreter()
+
+  const processor = guitarProcessor(onNoteOn, onNoteOff, () => pitchDetector)
+
+  return data => {
+    try {
+      const analysedData = interpreter(data)
+      if (analysedData) {
+        store.dispatch(setSignalsData(
+          GUITAR_SIGNALS.map((signal, i) => ({
+            [signal.id]: analysedData[i]
+          }))
+        ))
+        processor(analysedData)
+      }
+    } catch (err) {
+      console.error(err)
     }
-  } catch (err) {
-    console.error(err)
   }
 }
 
@@ -100,7 +116,7 @@ store.subscribe(() => {
       // open the new one
       if (usb.openDevice(currentDevice)) {
         store.dispatch(setSignals(GUITAR_SIGNALS))
-        usb.onData(dataListerner(guitarInterpreter()))
+        usb.onData(dataListener())
       } else {
         store.dispatch(setDevice(null))
       }

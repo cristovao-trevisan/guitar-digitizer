@@ -78,7 +78,7 @@ const mapStateToProps = (state, ownProps) => ({
 
 const mapDispatchToProps = (dispatch, ownProps) => ({
   setDevice: device => dispatch(setDevice(device)),
-  setSignalToMidiConnection: (signal, midi) => dispatch(setSignalToMidiConnection(signal, midi, 1)),
+  setSignalToMidiConnection: (signal, midi) => dispatch(setSignalToMidiConnection(signal, midi, 0)),
   removeSignalToMidiConnection: id => dispatch(removeSignalToMidiConnection(id))
 })
 

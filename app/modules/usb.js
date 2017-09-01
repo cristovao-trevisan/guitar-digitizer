@@ -34,7 +34,8 @@ export const openDevice = dev => {
 
 export const onData = (cb) => {
   if (!device) return false
-  device.endpoint.startPoll(5, 4096 * 4)
+  // testing got me to this poll size
+  device.endpoint.startPoll(20, 2048)
   device.endpoint.on('data', cb)
   device.endpoint.on('error', closeDevice)
 }
