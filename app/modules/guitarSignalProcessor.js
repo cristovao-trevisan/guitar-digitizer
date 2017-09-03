@@ -6,6 +6,9 @@ import { calculateAverageAmplitude } from './calculator'
 const LENGTH = 6
 const MAX_SAMPLE = 0x0fff
 
+const WINDOW_SIZE = 2048
+const WINDOW_DELTA = 512
+
 export const interpreter = () => {
   let buffer = []
   for (let i = 0; i < LENGTH; i++) buffer.push([])
@@ -14,6 +17,7 @@ export const interpreter = () => {
   let expectedIndex
 
   return data => {
+    // separate data for each channel (adding to buffer) and check headers
     for (let i = 0; i < data.length; i += 2) {
       let value = data.readUInt16LE(i, true) // true means to skip any assertion
 
@@ -38,9 +42,10 @@ export const interpreter = () => {
         if (inputCount === LENGTH) inputCount = 0
       }
     }
-    if (inputCount === 0) {
-      let output = buffer
-      buffer = []
+    // keep last WINDOW_SIZE samples and return values for each change with at least WINDOW_DELTA new samples
+    if (inputCount === 0 && buffer[0].length >= WINDOW_SIZE) {
+      let output = buffer.slice(buffer.length - WINDOW_SIZE, buffer.length)
+      buffer = buffer.slice(buffer.length - WINDOW_SIZE + WINDOW_DELTA, buffer.length)
       for (let i = 0; i < LENGTH; i++) buffer.push([])
       return output
     }
@@ -68,7 +73,6 @@ export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
   let lastNote = null
   const turnOffSignal = id => {
     if (playing[id]) {
-      // console.trace()
       onNoteOff(id, playing[id])
       playing[id] = false
       lastNote = null
@@ -89,7 +93,7 @@ export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
       const amplitude = calculateAverageAmplitude(data[i])
       amplitudes.push(amplitude)
       if (amplitude > MIN_AMPLITUDE) {
-        const pitch = getPitchDetector()(data[i].slice(0, 2048))
+        const pitch = getPitchDetector()(data[i].slice(0, WINDOW_SIZE))
         if (freqWithinRange(pitch, signal.id)) {
           const note = freqToMidi(pitch)
           // remove interference (equal note but less than 20% of the last amplitude)
@@ -99,9 +103,13 @@ export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
             turnOnSignal(signal.id, note, amplitude * 0x7F / MAX_AMPLITUDE)
           }
         } else if (pitch > 0) {
+          if (playing[signal.id]) console.log('pitch', pitch)
           turnOffSignal(signal.id)
         }
-      } else turnOffSignal(signal.id)
+      } else {
+        if (playing[signal.id]) console.log('amplitude', MIN_AMPLITUDE)
+        turnOffSignal(signal.id)
+      }
     })
   }
 }

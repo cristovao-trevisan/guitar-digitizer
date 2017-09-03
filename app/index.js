@@ -28,8 +28,7 @@ const store = createStore(reducers)
 
 // create frequency detector
 const { MacLeod, YIN } = require('node-pitchfinder')
-const basePitchOptions = {bufferSize: 2048, sampleRate: sampleFrequency}
-let pitchDetector = MacLeod(basePitchOptions)
+let pitchDetector = () => {}
 
 // ********************************* USB ***************************************
 // read devices
@@ -69,7 +68,6 @@ const onNoteOn = (id, note, velocity) => {
   const connection = store.getState().signalToMidiConnections[id]
   if (connection) {
     const device = midi.getDevice(connection.midi)
-    console.log(device)
     device.sendMessage(noteOn(connection.channel, note, velocity))
   }
 }
@@ -125,6 +123,7 @@ store.subscribe(() => {
 })
 
 // options change listener
+const basePitchOptions = {bufferSize: 2048, sampleRate: sampleFrequency}
 let currentOptions = {}
 store.subscribe(() => {
   const newOptions = store.getState().options
@@ -140,10 +139,10 @@ store.subscribe(() => {
   currentOptions = newOptions
 })
 store.dispatch(setOption('pitchAlgorithm', 'MacLeod'))
-
+store.dispatch(setOption('MacLeod', { cutoff: 0.6 }))
+store.dispatch(setOption('YIN', { threshold: 0.3 }))
 // store.dispatch(setSignals(GUITAR_SIGNALS))
 
-// store.dispatch(setSignals(GUITAR_SIGNALS))
 ReactDOM.render(
   <Provider store={store}>
     <App />
