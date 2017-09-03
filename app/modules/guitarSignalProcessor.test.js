@@ -6,7 +6,7 @@ const calcValue = value => (value & 0xfff) - (0x0fff / 2)
 const data = [1, 0, 2, 0, 3, 0, 4, 0, 5, 0, 6, 0]
 
 test('should interpret correct data', () => {
-  const times = 10
+  const times = 2048
   const interpret = interpreter()
   const d = Buffer.from(header(0).concat(repeat(data, times)))
   expect(interpret(d)).toEqual(Array(6).fill(0).map(
