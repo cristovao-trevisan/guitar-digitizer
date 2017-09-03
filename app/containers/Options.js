@@ -24,6 +24,7 @@ class Options extends React.Component {
         {
           options.map(option => (
             <Input
+              step={option.step}
               key={option.name}
               type='number'
               onChange={this.handleOptionChange(algorithm, option.name)}

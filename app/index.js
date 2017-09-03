@@ -81,9 +81,9 @@ const onNoteOff = (id, note, velocity) => {
     device.sendMessage(noteOff(connection.channel, note, 0x10))
   }
 }
+
 const dataListener = () => {
   const interpreter = guitarInterpreter()
-
   const processor = guitarProcessor(onNoteOn, onNoteOff, () => pitchDetector)
 
   return data => {
