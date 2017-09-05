@@ -23,18 +23,20 @@ export const interpreter = () => {
 
       if (value === 0xabcd) {
         if (inputCount !== 0) {
-          throw new Error('Missing input count: ' + inputCount)
+          let errorCount = inputCount
+          inputCount = 0
+          throw new Error('Missing input count: ' + errorCount)
         }
         inputCount = 0
         headerFlag = true
       } else if (headerFlag) {
+        headerFlag = false
         if ((value & 0xff00) !== 0xef00) {
           throw new Error('Error on header second short ' + value.toString(16))
         } else {
           if (expectedIndex && ((value & 0xff) !== expectedIndex)) {
             throw new Error('Lost index. Expected: ' + expectedIndex + ', but got: ' + (value & 0xff))
           }
-          headerFlag = false
           expectedIndex = (value + 1) & 0xff
         }
       } else {
