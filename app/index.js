@@ -95,7 +95,11 @@ const dataListener = () => {
             [signal.id]: analysedData[i]
           }))
         ))
-        processor(analysedData)
+        try {
+          processor(analysedData)
+        } catch (err) {
+          console.error(err)
+        }
       }
     } catch (err) {
       console.error(err)
@@ -139,8 +143,8 @@ store.subscribe(() => {
   currentOptions = newOptions
 })
 store.dispatch(setOption('pitchAlgorithm', 'MacLeod'))
-store.dispatch(setOption('MacLeod', { cutoff: 0.6 }))
-store.dispatch(setOption('YIN', { threshold: 0.3 }))
+store.dispatch(setOption('MacLeod', { cutoff: 0.85, probabilityThreshold: 0.7 }))
+store.dispatch(setOption('YIN', { threshold: 0.3, probabilityThreshold: 0.7 }))
 // store.dispatch(setSignals(GUITAR_SIGNALS))
 
 ReactDOM.render(
