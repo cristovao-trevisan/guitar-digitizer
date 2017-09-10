@@ -1,4 +1,4 @@
-import { interpreter, windowBuffer, processor } from './guitarSignalProcessor'
+import { interpreter, windowBuffer, guitarWindowBuffer, processor } from './guitarSignalProcessor'
 import { repeat } from '../helpers'
 import { Sinewave } from 'wave-generator'
 const { MacLeod } = require('node-pitchfinder')
@@ -63,15 +63,39 @@ describe('windowBuffer', () => {
     const windowDelta = 512
     const buffer = windowBuffer(windowSize, windowDelta)
 
-    const input1 = Array(6).fill(0).map((el, i) => repeat(i, windowSize - 100))
-    const input2 = Array(6).fill(0).map((el, i) => repeat(i, 100))
-    const input3 = Array(6).fill(0).map((el, i) => repeat(i, windowDelta - 10))
-    const input4 = Array(6).fill(0).map((el, i) => repeat(i, 10))
+    const input1 = repeat(1, windowSize - 100)
+    const input2 = repeat(2, 100)
+    const input3 = repeat(3, windowDelta - 10)
+    const input4 = repeat(4, 10)
 
     expect(buffer(input1)).toBeNull()
-    expect(buffer(input2)[0].length).toEqual(windowSize)
+    expect(buffer(input2).length).toEqual(windowSize)
     expect(buffer(input3)).toBeNull()
-    expect(buffer(input4)[0].length).toEqual(windowSize)
+    expect(buffer(input4).length).toEqual(windowSize)
+  })
+
+  test('should throw error if full', () => {
+    const windowSize = 100
+    const windowDelta = 10
+    const maxBufferSize = 150
+    const buffer = windowBuffer(windowSize, windowDelta, maxBufferSize)
+
+    const input1 = repeat(1, windowSize)
+    const input2 = repeat(2, maxBufferSize - windowSize + windowDelta)
+    const input3 = repeat(3, windowDelta + 1)
+
+    expect(buffer(input1).length).toBe(windowSize)
+    expect(buffer(input2).length).toBe(windowSize)
+    expect(() => buffer(input3)).toThrowError('Buffer overflow')
+  })
+})
+
+describe('guitarWindowBuffer', () => {
+  test('it\'s just 6 window buffers', () => {
+    const data = repeat(1, 2048)
+    const input = [data, data, data, data, data, data]
+    const buffer = guitarWindowBuffer()
+    expect(buffer(input).length).toBe(6)
   })
 })
 

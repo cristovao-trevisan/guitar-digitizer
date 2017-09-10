@@ -10,7 +10,7 @@ import reducers from './reducers'
 import * as usb from './modules/usb'
 import * as midi from './modules/midi'
 import { signals as GUITAR_SIGNALS, sampleFrequency } from './constants/guitar'
-import { interpreter as guitarInterpreter, processor as guitarProcessor } from './modules/guitarSignalProcessor'
+import { interpreter as guitarInterpreter, processor as guitarProcessor, guitarWindowBuffer } from './modules/guitarSignalProcessor'
 import { addDevice,
   removeDevice,
   setDevice,
@@ -83,23 +83,23 @@ const onNoteOff = (id, note, velocity) => {
 }
 
 const dataListener = () => {
-  const interpreter = guitarInterpreter()
-  const processor = guitarProcessor(onNoteOn, onNoteOff, () => pitchDetector)
+  const interpret = guitarInterpreter()
+  const process = guitarProcessor(onNoteOn, onNoteOff, () => pitchDetector)
+  const buffer = guitarWindowBuffer()
 
   return data => {
     try {
-      const analysedData = interpreter(data)
+      const analysedData = interpret(data)
       if (analysedData) {
         store.dispatch(setSignalsData(
           GUITAR_SIGNALS.map((signal, i) => ({
             [signal.id]: analysedData[i]
           }))
         ))
-        try {
-          processor(analysedData)
-        } catch (err) {
-          console.error(err)
-        }
+        // buffer data
+        const input = buffer(analysedData)
+        // process if data is ready
+        if (input) process(input)
       }
     } catch (err) {
       console.error(err)

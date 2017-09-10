@@ -3,7 +3,7 @@ import { toMidi as freqToMidi } from 'tonal-freq'
 import { signals } from '../constants/guitar'
 import { calculateAverageAmplitude } from './calculator'
 
-const LENGTH = 6
+const LENGTH = signals.length
 const MAX_SAMPLE = 0x0fff
 
 const WINDOW_SIZE = 2048
@@ -58,26 +58,32 @@ export const interpreter = () => {
 }
 
 // keep last WINDOW_SIZE samples and return values for each change with at least WINDOW_DELTA new samples
-export const windowBuffer = (windowSize = WINDOW_SIZE, windowDelta = WINDOW_DELTA) => {
+export const windowBuffer = (windowSize = WINDOW_SIZE, windowDelta = WINDOW_DELTA, maxBufferSize = MAX_BUFFER_SIZE) => {
   let buffer = []
-  for (let i = 0; i < LENGTH; i++) buffer.push([])
 
   return data => {
-    for (let i = 0; i < LENGTH; i++) buffer[i].push(...data[i])
-    if (buffer[0].length > MAX_BUFFER_SIZE) {
+    buffer.push(...data)
+    if (buffer.length > maxBufferSize) {
       buffer = []
-      for (let i = 0; i < LENGTH; i++) buffer.push([])
       throw new Error('Buffer overflow')
     }
 
-    if (buffer[0].length >= windowSize) {
-      let output = []
-      for (let i = 0; i < LENGTH; i++) {
-        output.push(buffer[i].slice(buffer[i].length - windowSize))
-        buffer[i] = buffer[i].slice(buffer[i].length - windowSize + windowDelta, buffer[i].length)
-      }
+    if (buffer.length >= windowSize) {
+      let output = buffer.slice(buffer.length - windowSize)
+      buffer = buffer.slice(windowDelta, buffer.length)
       return output
     }
+    return null
+  }
+}
+
+export const guitarWindowBuffer = () => {
+  let buffers = []
+  for (let i = 0; i < LENGTH; i++) buffers.push(windowBuffer())
+
+  return data => {
+    const output = signals.map((signal, i) => buffers[i](data[i]))
+    if (output[0] instanceof Array) return output
     return null
   }
 }
@@ -118,29 +124,23 @@ export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
     }
   }
 
-  const buffer = windowBuffer()
-
-  return input => {
-    const data = buffer(input)
-
-    if (data) {
-      const amplitudes = []
-      signals.forEach((signal, i) => {
-        const amplitude = calculateAverageAmplitude(data[i])
-        amplitudes.push(amplitude)
-        if (amplitude > MIN_AMPLITUDE) {
-          const pitch = getPitchDetector()(data[i].slice(0, WINDOW_SIZE))
-          if (freqWithinRange(pitch, signal.id)) {
-            const note = freqToMidi(pitch)
-            // remove interference (equal note but less than 20% of the last amplitude)
-            if (Math.round(note) === Math.round(lastNote) && amplitudes[i - 1] * 0.20 > amplitude) {
-              turnOffSignal(signal.id)
-            } else {
-              turnOnSignal(signal.id, note, amplitude * 0x7F / MAX_AMPLITUDE)
-            }
-          } else if (pitch > 0) turnOffSignal(signal.id)
-        } else turnOffSignal(signal.id)
-      })
-    }
+  return data => {
+    const amplitudes = []
+    signals.forEach((signal, i) => {
+      const amplitude = calculateAverageAmplitude(data[i])
+      amplitudes.push(amplitude)
+      if (amplitude > MIN_AMPLITUDE) {
+        const pitch = getPitchDetector()(data[i].slice(0, WINDOW_SIZE))
+        if (freqWithinRange(pitch, signal.id)) {
+          const note = freqToMidi(pitch)
+          // remove interference (equal note but less than 20% of the last amplitude)
+          if (Math.round(note) === Math.round(lastNote) && amplitudes[i - 1] * 0.20 > amplitude) {
+            turnOffSignal(signal.id)
+          } else {
+            turnOnSignal(signal.id, note, amplitude * 0x7F / MAX_AMPLITUDE)
+          }
+        } else if (pitch > 0) turnOffSignal(signal.id)
+      } else turnOffSignal(signal.id)
+    })
   }
 }
