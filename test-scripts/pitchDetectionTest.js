@@ -1,11 +1,10 @@
 const { Sinewave } = require('wave-generator')
-const { MacLeod, YIN, AMDF } = require('node-pitchfinder')
+const { MacLeod, YIN } = require('node-pitchfinder')
 
-const length = 1024
+const length = 2048
 const fs = 47000
 const macLeod = MacLeod({ bufferSize: length, sampleRate: fs, cutoff: 0.6 })
 const yin = YIN({ bufferSize: length, sampleRate: fs, threshold: 0.3 })
-const amdf = AMDF({ sensitivity: 0.15, ratio: 10 })
 
 const sumArrays = (arr1, arr2) => {
   const result = []
@@ -18,11 +17,16 @@ const mixedSignal = sumArrays(
   Sinewave(length, 1000, fs, 30)(length)
 )
 
-let result = macLeod.getResult(mixedSignal)
+console.time('MacLeod')
+for (let i = 0; i < 1000; i++) {
+  var result = macLeod.getResult(mixedSignal)
+}
+console.timeEnd('MacLeod')
 console.log(result.pitch, result.probability)
 
-result = yin.getResult(mixedSignal)
+console.time('YIN')
+for (let i = 0; i < 1000; i++) {
+  result = yin.getResult(mixedSignal)
+}
+console.timeEnd('YIN')
 console.log(result.pitch, result.probability)
-
-const pitch = amdf(mixedSignal)
-console.log(pitch)

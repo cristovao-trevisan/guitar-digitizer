@@ -6,8 +6,8 @@ import { calculateAverageAmplitude } from './calculator'
 const LENGTH = signals.length
 const MAX_SAMPLE = 0x0fff
 
-const WINDOW_SIZE = 2048
-const WINDOW_DELTA = 512
+const WINDOW_SIZE = 1024
+const WINDOW_DELTA = 1024
 const MAX_BUFFER_SIZE = WINDOW_SIZE * 5
 
 export const interpreter = () => {
@@ -77,9 +77,9 @@ export const windowBuffer = (windowSize = WINDOW_SIZE, windowDelta = WINDOW_DELT
   }
 }
 
-export const guitarWindowBuffer = () => {
+export const guitarWindowBuffer = (windowSize = WINDOW_SIZE, windowDelta = WINDOW_DELTA, maxBufferSize = MAX_BUFFER_SIZE) => {
   let buffers = []
-  for (let i = 0; i < LENGTH; i++) buffers.push(windowBuffer())
+  for (let i = 0; i < LENGTH; i++) buffers.push(windowBuffer(windowSize, windowDelta, maxBufferSize))
 
   return data => {
     const output = signals.map((signal, i) => buffers[i](data[i]))

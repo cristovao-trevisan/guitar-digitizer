@@ -94,7 +94,7 @@ describe('guitarWindowBuffer', () => {
   test('it\'s just 6 window buffers', () => {
     const data = repeat(1, 2048)
     const input = [data, data, data, data, data, data]
-    const buffer = guitarWindowBuffer()
+    const buffer = guitarWindowBuffer(2048)
     expect(buffer(input).length).toBe(6)
   })
 })
