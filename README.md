@@ -1,4 +1,4 @@
-# Guitar Digitalizer
+# Guitar Digitizer
 
 ## TODO's:
 - Pluck detection (amplitude changes)
