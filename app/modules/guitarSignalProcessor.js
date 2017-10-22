@@ -107,21 +107,18 @@ const freqWithinRange = (freq, signalId) => {
 
 export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
   let playing = {}
-  let lastNote = null
+  let playingAmplitude = {}
   const turnOffSignal = id => {
     if (playing[id]) {
       onNoteOff(id, playing[id])
       playing[id] = false
-      lastNote = null
+      playingAmplitude[id] = -1
     }
   }
-  const turnOnSignal = (id, note, velocity) => {
-    if (Math.round(note) !== Math.round(playing[id])) {
-      turnOffSignal(id)
-      playing[id] = note
-      lastNote = note
-      onNoteOn(id, note, velocity)
-    }
+  const turnOnSignal = (id, note, amplitude) => {
+    turnOffSignal(id)
+    playing[id] = note
+    onNoteOn(id, note, amplitude * 0x7F / MAX_AMPLITUDE) // 0x7F = max velocity
   }
 
   return data => {
@@ -134,10 +131,13 @@ export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
         if (freqWithinRange(pitch, signal.id)) {
           const note = freqToMidi(pitch)
           // remove interference (equal note but less than 20% of the last amplitude)
-          if (Math.round(note) === Math.round(lastNote) && amplitudes[i - 1] * 0.20 > amplitude) {
+          if (Math.round(note) === Math.round(playing[signal.id]) &&
+              amplitudes[i - 1] * 0.20 > amplitude) {
             turnOffSignal(signal.id)
-          } else {
-            turnOnSignal(signal.id, note, amplitude * 0x7F / MAX_AMPLITUDE)
+          } else if (Math.round(note) !== Math.round(playing[signal.id]) ||
+                      amplitude > 1.3 * playingAmplitude[signal.id]) {
+            playingAmplitude[signal.id] = amplitude
+            turnOnSignal(signal.id, note, amplitude)
           }
         } else if (pitch > 0) turnOffSignal(signal.id)
       } else turnOffSignal(signal.id)

@@ -121,4 +121,18 @@ describe('processor', () => {
     process(Array(6).fill(0).map(() => A440))
     expect(called).toBe(false)
   })
+
+  test('should detect amplitude changes', () => {
+    const sample = Sinewave(size, 110, fs, 500)(size / 2)
+    const sample2 = Sinewave(size, 110, fs, 1000)(size / 2)
+    const array = Array(6).fill(0).map(() => Array(size).fill(0))
+    array[1] = sample
+    const onNoteOn = jest.fn()
+    const onNoteOff = jest.fn()
+    const process = processor(onNoteOn, onNoteOff, () => detector)
+    process(array)
+    array[1] = sample2
+    process(array)
+    expect(onNoteOn.mock.calls.length).toBe(2)
+  })
 })
