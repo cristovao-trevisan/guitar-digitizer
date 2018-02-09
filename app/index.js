@@ -61,10 +61,18 @@ midi.onChange(devices => {
   }
 })
 
+// window.notesOn = []
+// window.notesOff = []
+// window.clearNotes = () => {
+//   window.notesOn = []
+//   window.notesOff = []
+// }
+
 // ******************************* DATA PROCESSING *****************************
 const noteOn = (channel, note, velocity) => [0b10010000 | channel, parseInt(note), parseInt(velocity)]
 const onNoteOn = (id, note, velocity) => {
   console.log('Note on, id: ' + id + ', note: ' + note)
+  // window.notesOn.push({ id, note })
   const connection = store.getState().signalToMidiConnections[id]
   if (connection) {
     const device = midi.getDevice(connection.midi)
@@ -75,6 +83,7 @@ const onNoteOn = (id, note, velocity) => {
 const noteOff = (channel, note, velocity) => [0b10000000 | channel, parseInt(note), parseInt(velocity)]
 const onNoteOff = (id, note, velocity) => {
   console.log('Note off, id: ' + id + ', note: ' + note)
+  // window.notesOff.push({ id, note })
   const connection = store.getState().signalToMidiConnections[id]
   if (connection) {
     const device = midi.getDevice(connection.midi)
@@ -86,6 +95,7 @@ const dataListener = () => {
   const interpret = guitarInterpreter()
   const process = guitarProcessor(onNoteOn, onNoteOff, () => pitchDetector)
   const buffer = guitarWindowBuffer()
+  let errorCount = 0
 
   return data => {
     try {
@@ -103,6 +113,11 @@ const dataListener = () => {
       }
     } catch (err) {
       console.error(err)
+      if (errorCount++ > 100) {
+        const device = store.getState().device
+        store.dispatch(setDevice(null))
+        store.dispatch(setDevice(device))
+      }
     }
   }
 }

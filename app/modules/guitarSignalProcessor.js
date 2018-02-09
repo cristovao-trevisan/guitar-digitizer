@@ -134,8 +134,8 @@ export const processor = (onNoteOn, onNoteOff, getPitchDetector) => {
           if (Math.round(note) === Math.round(playing[signal.id]) &&
               amplitudes[i - 1] * 0.20 > amplitude) {
             turnOffSignal(signal.id)
-          } else if (Math.round(note) !== Math.round(playing[signal.id]) ||
-                      amplitude > 1.3 * playingAmplitude[signal.id]) {
+          } else if (Math.round(note) !== Math.round(playing[signal.id]) || // different note
+                      amplitude > 1.6 * playingAmplitude[signal.id]) { // plucking
             playingAmplitude[signal.id] = amplitude
             turnOnSignal(signal.id, note, amplitude)
           }
